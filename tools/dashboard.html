@@ -162,6 +162,7 @@
     font-size: 12px;
   }
   .cadence-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .databox { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--surface-2); margin-top: 10px; }
 
   /* ---------- Main ---------- */
   .main { display: flex; flex-direction: column; min-width: 0; height: 100%; }
@@ -309,6 +310,14 @@
     z-index: 10;
   }
   .backdrop.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px; width: 380px; max-width: 90vw; z-index: 12; box-shadow: 0 12px 32px var(--shadow);
+  }
+  .modal h2 { font-family: var(--font-display); font-weight: 400; font-size: 17px; margin: 0 0 10px; }
+  .modal p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
   .drawer {
     position: fixed; top: 0; right: 0; height: 100%; width: 440px; max-width: 92vw;
     background: var(--surface-2); border-left: 1px solid var(--line);
@@ -486,7 +495,9 @@
     selectedId: null,
     drawerOpen: false,
     drawerMode: "view", // view | edit | create
-    deleteArmed: null
+    deleteArmed: null,
+    pendingImport: null,
+    importError: null
   };
 
   function escapeHtml(s) {
@@ -531,7 +542,8 @@
         '<main class="main">' + renderTopbar() + '<div class="content" id="content">' + renderContent() + '</div></main>' +
       '</div>' +
       '<div class="backdrop' + (state.drawerOpen ? ' open' : '') + '" data-action="close-drawer"></div>' +
-      renderDrawer();
+      renderDrawer() +
+      (state.pendingImport ? renderImportModal() : "");
     if (state.view === "cards") {
       var rc = document.getElementById("resultsContainer");
       if (rc) rc.innerHTML = renderResultsList();
@@ -564,6 +576,16 @@
             '<div class="cadence-label">Cadence</div>' +
             '<div class="cadence-value">Research sprint ' + state.meta.researchSprint + ' → Delivery sprint ' + (state.meta.researchSprint + 1) + '</div>' +
             '<div class="cadence-row"><span style="font-size:11px;color:var(--muted)">One sprint ahead</span><button class="cadence-btn" data-action="advance-sprint">Advance →</button></div>' +
+          '</div>' +
+          '<div class="databox">' +
+            '<div class="cadence-label">Data <span style="text-transform:none;letter-spacing:0;">— this browser only</span></div>' +
+            '<div class="cadence-row" style="justify-content:flex-start;gap:6px;">' +
+              '<button class="cadence-btn" data-action="export-json">Export</button>' +
+              '<button class="cadence-btn" data-action="import-json">Import</button>' +
+              '<span class="copied-flash" id="exportFlash" style="display:none;">Copied</span>' +
+            '</div>' +
+            (state.importError ? '<div style="font-size:11px;color:var(--critical);margin-top:6px;">' + escapeHtml(state.importError) + '</div>' : '') +
+            '<input type="file" id="importFile" accept="application/json" style="display:none;">' +
           '</div>' +
         '</div>' +
       '</aside>'
@@ -964,6 +986,41 @@
     document.body.removeChild(ta);
   }
 
+  function buildExportJson() {
+    return JSON.stringify({ cards: state.cards, meta: state.meta, exportedAt: new Date().toISOString() }, null, 2);
+  }
+  function exportJson() {
+    var data = buildExportJson();
+    copyText(data, document.getElementById("exportFlash"));
+    try {
+      var blob = new Blob([data], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "docket-export-" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    } catch (e) {}
+  }
+  function renderImportModal() {
+    var incoming = state.pendingImport.cards.length;
+    return (
+      '<div class="backdrop open" data-action="cancel-import"></div>' +
+      '<div class="modal">' +
+        '<h2>Import data</h2>' +
+        '<p>This file has ' + incoming + ' requirement card' + (incoming === 1 ? "" : "s") + '. Importing replaces the ' + state.cards.length + ' card' + (state.cards.length === 1 ? "" : "s") + ' currently in this browser — that can\'t be undone.</p>' +
+        '<div class="modal-actions"><button class="btn" data-action="cancel-import">Cancel</button><button class="btn btn-primary" data-action="confirm-import">Replace and import</button></div>' +
+      '</div>'
+    );
+  }
+  function applyImport() {
+    if (!state.pendingImport) return;
+    state.cards = state.pendingImport.cards;
+    if (state.pendingImport.meta) state.meta = state.pendingImport.meta;
+    saveCards(state.cards); saveMeta(state.meta);
+    state.pendingImport = null; state.importError = null;
+    render();
+  }
+
   /* ---------------- Actions ---------------- */
 
   function openCard(id) {
@@ -1077,6 +1134,20 @@
         var mdCard = findCard(el.getAttribute("data-id"));
         if (mdCard) copyText(buildMarkdown(mdCard), null);
         break;
+      case "export-json":
+        exportJson();
+        break;
+      case "import-json":
+        state.importError = null;
+        document.getElementById("importFile").click();
+        break;
+      case "cancel-import":
+        state.pendingImport = null;
+        render();
+        break;
+      case "confirm-import":
+        applyImport();
+        break;
       case "move-fwd":
       case "move-back": {
         var mc = findCard(el.getAttribute("data-id"));
@@ -1107,6 +1178,25 @@
     if (qs) {
       var qc = findCard(qs.getAttribute("data-id"));
       if (qc) { qc.status = qs.value; saveCards(state.cards); render(); }
+      return;
+    }
+    if (e.target.id === "importFile") {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var parsed = JSON.parse(reader.result);
+          if (!parsed || !Array.isArray(parsed.cards)) throw new Error("bad shape");
+          state.pendingImport = parsed;
+          state.importError = null;
+        } catch (err) {
+          state.importError = "That file doesn't look like a Docket export.";
+        }
+        render();
+      };
+      reader.readAsText(file);
       return;
     }
   });
