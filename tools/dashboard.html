@@ -1,15 +1,15 @@
 <style>
   :root {
-    --ink: #161B26;
-    --paper: #E9EBEE;
-    --surface: #F6F7F8;
+    --ink: #111111;
+    --paper: #F1F1F1;
+    --surface: #E9E9E9;
     --surface-2: #FFFFFF;
-    --line: #C9CDD3;
-    --muted: #6B7280;
-    --accent: #2C3E75;
-    --accent-soft: #DDE2F0;
+    --line: #D2D2D2;
+    --muted: #666666;
+    --accent: #111111;
+    --accent-soft: #E4E4E4;
     --accent-ink: #FFFFFF;
-    --shadow: rgba(22,27,38,0.14);
+    --shadow: rgba(0,0,0,0.14);
 
     --critical: #d03b3b;
     --warning: #b8862e;
@@ -27,16 +27,16 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --ink: #E7E9EC;
-      --paper: #12151C;
-      --surface: #1B2029;
-      --surface-2: #232936;
-      --line: #333A47;
-      --muted: #9AA1AC;
-      --accent: #7D8FDB;
-      --accent-soft: #263056;
-      --accent-ink: #12151C;
-      --shadow: rgba(0,0,0,0.45);
+      --ink: #F1F1F1;
+      --paper: #0C0C0C;
+      --surface: #161616;
+      --surface-2: #1E1E1E;
+      --line: #333333;
+      --muted: #999999;
+      --accent: #F1F1F1;
+      --accent-soft: #2A2A2A;
+      --accent-ink: #111111;
+      --shadow: rgba(0,0,0,0.5);
 
       --stage-draft: #45528A;
       --stage-reviewed: #56699E;
@@ -46,16 +46,16 @@
     }
   }
   :root[data-theme="dark"] {
-    --ink: #E7E9EC;
-    --paper: #12151C;
-    --surface: #1B2029;
-    --surface-2: #232936;
-    --line: #333A47;
-    --muted: #9AA1AC;
-    --accent: #7D8FDB;
-    --accent-soft: #263056;
-    --accent-ink: #12151C;
-    --shadow: rgba(0,0,0,0.45);
+    --ink: #F1F1F1;
+    --paper: #0C0C0C;
+    --surface: #161616;
+    --surface-2: #1E1E1E;
+    --line: #333333;
+    --muted: #999999;
+    --accent: #F1F1F1;
+    --accent-soft: #2A2A2A;
+    --accent-ink: #111111;
+    --shadow: rgba(0,0,0,0.5);
     --stage-draft: #45528A;
     --stage-reviewed: #56699E;
     --stage-backlog: #6D82BB;
@@ -63,16 +63,16 @@
     --stage-closed: #C2CCEC;
   }
   :root[data-theme="light"] {
-    --ink: #161B26;
-    --paper: #E9EBEE;
-    --surface: #F6F7F8;
+    --ink: #111111;
+    --paper: #F1F1F1;
+    --surface: #E9E9E9;
     --surface-2: #FFFFFF;
-    --line: #C9CDD3;
-    --muted: #6B7280;
-    --accent: #2C3E75;
-    --accent-soft: #DDE2F0;
+    --line: #D2D2D2;
+    --muted: #666666;
+    --accent: #111111;
+    --accent-soft: #E4E4E4;
     --accent-ink: #FFFFFF;
-    --shadow: rgba(22,27,38,0.14);
+    --shadow: rgba(0,0,0,0.14);
     --stage-draft: #B9C3E6;
     --stage-reviewed: #8C9AD1;
     --stage-backlog: #5E71B9;
@@ -305,7 +305,7 @@
 
   /* ---------- Drawer ---------- */
   .backdrop {
-    position: fixed; inset: 0; background: rgba(10, 12, 18, 0.35);
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4);
     opacity: 0; pointer-events: none; transition: opacity 180ms ease;
     z-index: 10;
   }
