@@ -1,0 +1,87 @@
+name: Legal Requirement Card
+description: A single legal research finding, written as an atomic requirement engineers can attach to a story.
+title: "[LRC] <short title>"
+labels:
+  - legal-requirement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        See `frameworks/legal-research-delivery-framework.md` (section 3.1) for how this card fits into the traceability matrix and delivery cadence.
+
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: Statute, regulation, case law, or other citation this requirement derives from. Include a link if available.
+      placeholder: "e.g. Digital Services Act, Art. 28(1) — https://..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: statement
+    attributes:
+      label: Requirement statement
+      description: State the requirement in MUST/MUST NOT/SHOULD language, as you would a user story's core rule.
+      placeholder: "The product MUST NOT ..."
+    validations:
+      required: true
+
+  - type: input
+    id: applies-to
+    attributes:
+      label: Applies to (epic/feature)
+      description: Link the product epic, feature, or story this requirement affects.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: risk-tier
+    attributes:
+      label: Risk tier
+      description: "P0 (Blocking) gates sprint planning until addressed. P1 (Advisory) attaches as acceptance criteria. P2 (Monitor) is logged in the risk register only."
+      options:
+        - "P0 - Blocking"
+        - "P1 - Advisory"
+        - "P2 - Monitor"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: One or more concrete, testable conditions that discharge this requirement.
+      placeholder: |
+        - AC1: ...
+        - AC2: ...
+    validations:
+      required: true
+
+  - type: input
+    id: legal-owner
+    attributes:
+      label: Legal owner
+    validations:
+      required: true
+
+  - type: input
+    id: eng-owner
+    attributes:
+      label: Engineering owner
+    validations:
+      required: false
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - Draft
+        - Reviewed
+        - Attached to backlog
+        - Verified at demo
+        - Closed
+      default: 0
+    validations:
+      required: true
